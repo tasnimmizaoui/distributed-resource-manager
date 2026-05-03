@@ -17,7 +17,6 @@ Un **mini-orchestrateur distribué** inspiré de Kubernetes, ZooKeeper et Consul
 - [ Fonctionnalités](#-fonctionnalités)
 - [ Dépendances](#-dépendances)
 - [ Lancement rapide](#-lancement-rapide)
-- [ Dashboard Web](#-dashboard-web)
 - [ Structure du projet](#-structure-du-projet)
 - [ Configuration](#-configuration)
 - [ Exemples](#-exemples)
@@ -193,34 +192,6 @@ mvn exec:java \
 2. Attendre quelques secondes
 3. Observer la réélection automatique
 4. Continuer à soumettre des jobs
-
----
-
-## 📊 Dashboard Web
-
-Le projet inclut un tableau de bord interactif en temps réel permettant de visualiser :
-
-* Topologie du cluster
-* Leader actuel
-* État des nœuds
-* Jobs en cours
-* Flux réseau
-* Journaux système
-* Statistiques d'exécution
-
-### Lancer le dashboard
-
-```bash
-cd dashboard
-npm install
-npm run dev
-```
-
-Interface accessible sur :
-
-```text
-http://localhost:5173
-```
 
 ---
 
