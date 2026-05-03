@@ -1,0 +1,117 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+package com.example.drm.grpc;
+
+// ─── Identité réseau d'un nœud ───────────────────────────────────────
+message NodeId {
+  string id = 1;
+  string host = 2;
+  int32 port = 3;
+}
+
+// ─── Heartbeat ────────────────────────────────────────────────────────
+message HeartbeatRequest {
+  NodeId sender = 1;
+  int64 timestamp = 2;
+}
+message HeartbeatResponse {
+  bool acknowledged = 1;
+  int64 leader_timestamp = 2;
+}
+
+// ─── Élection (Bully simplifié) ──────────────────────────────────────
+message ElectionRequest {
+  NodeId candidate = 1;
+}
+message ElectionResponse {
+  bool ok = 1;
+  NodeId responder = 2;
+}
+message LeaderAnnouncement {
+  NodeId leader = 1;
+  int64 election_term = 2;
+}
+message Ack {}
+
+// ─── Réplication d'état ──────────────────────────────────────────────
+message StateEntry {
+  string key = 1;
+  string value = 2;
+  int64 sequence_number = 3;
+}
+message ReplicateRequest {
+  repeated StateEntry entries = 1;
+  NodeId leader = 2;
+}
+message ReplicateResponse {
+  bool success = 1;
+  int64 applied_sequence = 2;
+}
+
+// ─── Soumission / exécution de tâche ────────────────────────────────
+message JobDescriptor {
+  string job_id = 1;
+  string job_type = 2;
+  string payload = 3;
+}
+message SubmitJobRequest {
+  JobDescriptor job = 1;
+}
+message SubmitJobResponse {
+  bool success = 1;
+  string assigned_node = 2;
+  string message = 3;
+}
+message ExecuteJobRequest {
+  JobDescriptor job = 1;
+}
+message ExecuteJobResponse {
+  bool success = 1;
+  string result = 2;
+}
+
+// ─── Verrou distribué ────────────────────────────────────────────────
+message LockRequest {
+  string resource_id = 1;
+  NodeId requester = 2;
+  int64 timeout_ms = 3;
+}
+message LockResponse {
+  bool granted = 1;
+  string lock_token = 2;
+}
+message UnlockRequest {
+  string resource_id = 1;
+  string lock_token = 2;
+  NodeId requester = 3;
+}
+message UnlockResponse {
+  bool success = 1;
+}
+
+// ─── Services ────────────────────────────────────────────────────────
+service ClientService {
+  // Appelé par les clients externes pour soumettre une tâche
+  rpc SubmitJob(SubmitJobRequest) returns (SubmitJobResponse);
+}
+
+service ClusterService {
+  // Surveillance
+  rpc Heartbeat(HeartbeatRequest) returns (HeartbeatResponse);
+
+  // Élection
+  rpc RequestVote(ElectionRequest) returns (ElectionResponse);
+  rpc AnnounceLeader(LeaderAnnouncement) returns (Ack);
+
+  // Réplication
+  rpc ReplicateState(ReplicateRequest) returns (ReplicateResponse);
+
+  // Routage interne
+  rpc ForwardJob(SubmitJobRequest) returns (SubmitJobResponse);
+  rpc ExecuteJob(ExecuteJobRequest) returns (ExecuteJobResponse);
+
+  // Verrouillage distribué
+  rpc AcquireLock(LockRequest) returns (LockResponse);
+  rpc ReleaseLock(UnlockRequest) returns (UnlockResponse);
+}

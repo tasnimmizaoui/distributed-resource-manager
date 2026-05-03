@@ -1,0 +1,20 @@
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# Maven build
+target/
+
+# Logs de WAL (générés à l'exécution)
+wal_*.log
+
+# Logs Logback
+*.log
+
+# Java
+*.class
+*.jar
+
+# OS
+.DS_Store
+Thumbs.db
